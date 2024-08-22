@@ -4,7 +4,7 @@
 
 ### Dictionnaire
 
-![Dictionnaire sujet 1](./images/dictionnaire1-exam.png)
+![MCD sujet 1](./images/dictionnaire1-exam.png)
 
 ### MCD
 
@@ -22,82 +22,65 @@ Type de produit `1,N` associé à Produit `1,1`
 
 ![MPD sujet 1](./images/MPD1-exam.png)
 
+(les noms de mes propriétés ont changés touts seuls)
+
 ```sql
-DROP TABLE IF EXISTS Type;
 CREATE TABLE Type (
-    id_type INT AUTO_INCREMENT NOT NULL,
-    nom_type VARCHAR(50),
-    PRIMARY KEY (id_type)
-) ENGINE=InnoDB;
+    id_type INTEGER PRIMARY KEY AUTOINCREMENT,
+    nom VARCHAR(50)
+);
 
-DROP TABLE IF EXISTS Produit;
 CREATE TABLE Produit (
-    id_produit INT AUTO_INCREMENT NOT NULL,
-    référence_produit VARCHAR(50),
-    désignation_produit VARCHAR(100),
-    descriptif_produit TEXT,
-    prix_ht_produit INT,
-    id_type INT,
-    mains_oeuvre INT,
-    PRIMARY KEY (id_produit)
-) ENGINE=InnoDB;
+    id_produit INTEGER PRIMARY KEY AUTOINCREMENT,
+    référence VARCHAR(50),
+    désignation VARCHAR(100),
+    descriptif TEXT,
+    prix_ht INTEGER,
+    id_type INTEGER,
+    mains_oeuvre INTEGER,
+    FOREIGN KEY (id_type) REFERENCES Type (id_type)
+);
 
-DROP TABLE IF EXISTS Fournisseur;
 CREATE TABLE Fournisseur (
-    id_fournisseur INT AUTO_INCREMENT NOT NULL,
-    raison_sociale_fournisseur VARCHAR(100),
-    adresse_fournisseur VARCHAR(255),
-    PRIMARY KEY (id_fournisseur)
-) ENGINE=InnoDB;
+    id_fournisseur INTEGER PRIMARY KEY AUTOINCREMENT,
+    raison_sociale VARCHAR(100),
+    adresse VARCHAR(255)
+);
 
-DROP TABLE IF EXISTS Commande;
 CREATE TABLE Commande (
-    id_commande INT AUTO_INCREMENT NOT NULL,
-    date_commande DATE,
-    PRIMARY KEY (id_commande)
-) ENGINE=InnoDB;
+    id_commande INTEGER PRIMARY KEY AUTOINCREMENT,
+    date DATE
+);
 
-DROP TABLE IF EXISTS Contenir;
 CREATE TABLE Contenir (
-    id_commande INT NOT NULL,
-    id_produit INT NOT NULL,
-    quantité INT,
+    id_commande INTEGER,
+    id_produit INTEGER,
+    quantité INTEGER,
     date_livraison_prevue DATE,
-    prix_négocié INT,
-    PRIMARY KEY (id_commande, id_produit)
-) ENGINE=InnoDB;
+    prix_négocié INTEGER,
+    PRIMARY KEY (id_commande, id_produit),
+    FOREIGN KEY (id_commande) REFERENCES Commande (id_commande),
+    FOREIGN KEY (id_produit) REFERENCES Produit (id_produit)
+);
 
-DROP TABLE IF EXISTS Livrer;
 CREATE TABLE Livrer (
-    id_produit INT NOT NULL,
-    id_fournisseur INT NOT NULL,
+    id_produit INTEGER,
+    id_fournisseur INTEGER,
     référence_fournisseur VARCHAR(50),
-    prix_achat_moyen INT,
-    PRIMARY KEY (id_produit, id_fournisseur)
-) ENGINE=InnoDB;
+    prix_achat_moyen INTEGER,
+    PRIMARY KEY (id_produit, id_fournisseur),
+    FOREIGN KEY (id_produit) REFERENCES Produit (id_produit),
+    FOREIGN KEY (id_fournisseur) REFERENCES Fournisseur (id_fournisseur)
+);
 
-DROP TABLE IF EXISTS DateCommande;
-CREATE TABLE DateCommande (
-    date_commande DATE PRIMARY KEY
-) ENGINE=InnoDB;
-
-ALTER TABLE Produit 
-ADD CONSTRAINT FK_Produit_Type FOREIGN KEY (id_type) REFERENCES Type (id_type);
-
-ALTER TABLE Contenir 
-ADD CONSTRAINT FK_Contenir_Commande FOREIGN KEY (id_commande) REFERENCES Commande (id_commande);
-ALTER TABLE Contenir 
-ADD CONSTRAINT FK_Contenir_Produit FOREIGN KEY (id_produit) REFERENCES Produit (id_produit);
-
-ALTER TABLE Livrer 
-ADD CONSTRAINT FK_Livrer_Produit FOREIGN KEY (id_produit) REFERENCES Produit (id_produit);
-ALTER TABLE Livrer 
-ADD CONSTRAINT FK_Livrer_Fournisseur FOREIGN KEY (id_fournisseur) REFERENCES Fournisseur (id_fournisseur);
+CREATE TABLE Date (
+    date DATE PRIMARY KEY
+);
 ```
 
 ### Exemple d'une commande
 
-Voici une commande pour récupérer depuis la table `Commande` la commande dont l'id est 1.
+Voici une ligne de code pour récupérer depuis la table `Commande` la commande dont l'id est 1.
 
 ```sql
 SELECT * 
@@ -108,6 +91,99 @@ WHERE id_commande = 1;
 
 ## Sujet 2
 
+### Dictionnaire
+
+![dictionnaire sujet 2](./images/dictionnaire2-exam.png)
+![dictionnaire sujet 2](./images/dictionnaire2-2-exam.png)
+
 ### MCD
 
 ![MCD sujet 2](./images/MCD2-exam.png)
+
+Sportif `0,1` possède un club `0,N`
+
+`0,N` car un club peut ne posséder aucun adhérants (admettons qu'il est en train de faire faillite) et il peut posséder plusieurs adhérants comme un club normal.
+
+Idem pour une compétition: `0,N` car elle peut ne posséder aucun participants.
+
+### MLD
+
+![MLD sujet 2](./images/MLD2-exam.png)
+
+### MPD avec les commandes SQL
+
+![MPD sujet 2](./images/MPD2-exam.png)
+
+(les noms de mes propriétés ont changés touts seuls)
+
+Voici le code sql:
+
+```sql
+CREATE TABLE Club (
+    id_club INTEGER PRIMARY KEY AUTOINCREMENT,
+    nom VARCHAR(30),
+    adresse VARCHAR
+);
+
+CREATE TABLE Sportif (
+    id_sportif INTEGER PRIMARY KEY AUTOINCREMENT,
+    nom VARCHAR(30),
+    prénom VARCHAR(30),
+    adresse VARCHAR,
+    téléphone VARCHAR,
+    fax VARCHAR,
+    email VARCHAR,
+    id_club INTEGER,
+    FOREIGN KEY (id_club) REFERENCES Club (id_club)
+);
+
+
+CREATE TABLE Compétition (
+    id_competition INTEGER PRIMARY KEY AUTOINCREMENT,
+    date DATE,
+    ville VARCHAR(30),
+    libellé VARCHAR
+);
+
+CREATE TABLE Épreuve (
+    id_epreuve INTEGER PRIMARY KEY AUTOINCREMENT,
+    distance INTEGER,
+    conditions TEXT,
+    id_type INTEGER,
+    FOREIGN KEY (id_type) REFERENCES TypeÉpreuve (id_type)
+);
+
+CREATE TABLE Participer (
+    id_sportif INTEGER,
+    id_competition INTEGER,
+    num_dossard VARCHAR,
+    num_licence VARCHAR,
+    date_certificat_medical DATE,
+    PRIMARY KEY (id_sportif, id_competition),
+    FOREIGN KEY (id_sportif) REFERENCES Sportif (id_sportif),
+    FOREIGN KEY (id_competition) REFERENCES Compétition (id_competition)
+);
+
+CREATE TABLE Contenir (
+    id_competition INTEGER,
+    id_epreuve INTEGER,
+    ordre_epreuve INTEGER,
+    PRIMARY KEY (id_competition, id_epreuve),
+    FOREIGN KEY (id_competition) REFERENCES Compétition (id_competition)
+);
+
+CREATE TABLE Type (
+    id_type INTEGER,
+    nom VARCHAR(30)
+);
+```
+
+### Exemple d'une commande:
+
+Voici une ligne de code pour récupérer un sportif depuis la table `Sportif` le sportif dont l'id est 1.
+
+```sql
+SELECT * 
+FROM Sportif 
+WHERE id_sportif = 1;
+```
